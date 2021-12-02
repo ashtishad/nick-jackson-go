@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/ashtishad/go-microservice/handlers"
@@ -29,5 +31,27 @@ func main() {
 		WriteTimeout: 2 * time.Second,
 	}
 
-	s.ListenAndServe()
+	go func() {
+		l.Println("Starting server on port 8080")
+		err := s.ListenAndServe()
+		if err != nil {
+			l.Fatal(err)
+			os.Exit(1)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 30 seconds.
+	quit := make(chan os.Signal, 1) // For a channel used for notification of just one signal value, a buffer of size 1 is sufficient.
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	l.Println("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := s.Shutdown(ctx); err != nil {
+		l.Println("Could not gracefully shutdown the server:", err)
+		os.Exit(1)
+	}
+	l.Println("Server exiting")
 }
