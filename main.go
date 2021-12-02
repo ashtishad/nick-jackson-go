@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/ashtishad/go-microservice/handlers"
 )
@@ -20,5 +21,13 @@ func main() {
 	mux.Handle("/", hh)
 	mux.Handle("/bye", gh)
 
-	http.ListenAndServe(Port, mux)
+	s := &http.Server{
+		Addr:         Port,
+		Handler:      mux,
+		IdleTimeout:  20 * time.Second,
+		ReadTimeout:  2 * time.Second,
+		WriteTimeout: 2 * time.Second,
+	}
+
+	s.ListenAndServe()
 }
