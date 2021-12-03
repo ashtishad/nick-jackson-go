@@ -1,7 +1,11 @@
 // Package data contains the products data
 package data
 
-import "time"
+import (
+	"encoding/json"
+	"io"
+	"time"
+)
 
 // Product defines the structure of a product API
 type Product struct {
@@ -19,6 +23,13 @@ type Products []*Product
 
 func GetProducts() Products {
 	return ProductList
+}
+
+func (p *Products) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	e.SetIndent("", "\t")
+	err := e.Encode(p)
+	return err
 }
 
 // ProductList Why pointer? - making products mutable
