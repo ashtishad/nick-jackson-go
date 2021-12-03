@@ -17,11 +17,20 @@ func NewProducts(l *log.Logger) *Products {
 }
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == http.MethodGet {
+		p.getProducts(w, r)
+		return
+	}
+	// rest of methods not implemented yet
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
 	lp := data.GetProducts()
 	err := lp.ToJSON(w)
 	if err != nil {
 		http.Error(w, "Unable to encode json", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 }
