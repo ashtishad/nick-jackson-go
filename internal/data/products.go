@@ -15,8 +15,14 @@ type Product struct {
 	DeletedOn   string  `json:"-"`
 }
 
-// Products Why pointer? - making products mutable
-var Products = []*Product{
+type Products []*Product
+
+func GetProducts() Products {
+	return ProductList
+}
+
+// ProductList Why pointer? - making products mutable
+var ProductList = Products{
 	{
 		ID:          1,
 		Name:        "Latte",
