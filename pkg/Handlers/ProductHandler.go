@@ -22,15 +22,14 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.getProducts(w, r)
 		return
 	}
-	// rest of methods not implemented yet
+	// will add POST handler later
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
 func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
 	lp := data.GetProducts()
-	err := lp.ToJSON(w)
-	if err != nil {
-		http.Error(w, "Unable to encode json", http.StatusInternalServerError)
+	if err := lp.ToJSON(w); err != nil {
+		http.Error(w, "Unable to marshal json", http.StatusInternalServerError)
 		return
 	}
 }
