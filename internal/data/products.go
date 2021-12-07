@@ -19,12 +19,20 @@ type Product struct {
 	DeletedOn   string  `json:"-"`
 }
 
+// FromJSON populates the product struct from a JSON payload
+func (p *Product) FromJSON(r io.Reader) error {
+	e := json.NewDecoder(r)
+	err := e.Decode(p)
+	return err
+}
+
 type Products []*Product
 
 func GetProducts() Products {
 	return ProductList
 }
 
+// ToJSON populates the JSON payload from the product struct
 func (p *Products) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	e.SetIndent("", "\t")
