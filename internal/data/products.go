@@ -28,6 +28,9 @@ func (p *Product) FromJSON(r io.Reader) error {
 
 type Products []*Product
 
+func (p *Products) Len() int {
+	return len(ProductList)
+}
 func GetProducts() Products {
 	return ProductList
 }
@@ -40,7 +43,7 @@ func (p *Products) ToJSON(w io.Writer) error {
 	return err
 }
 
-// ProductList Why pointer? - making products mutable
+// ProductList Why pointer? - making ProductList mutable
 var ProductList = Products{
 	{
 		ID:          1,
