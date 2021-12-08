@@ -3,6 +3,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 )
@@ -35,6 +36,27 @@ func (p *Product) generateNextID() int {
 func (p *Product) AddProduct() {
 	p.ID = p.generateNextID()
 	ProductList = append(ProductList, p)
+}
+
+var ErrProductNotFound = fmt.Errorf("product not found")
+
+func (p *Product) UpdateProductByID(id int, oldID int) error {
+	_, idx, err := p.getProductByID(oldID)
+	if err != nil {
+		return err
+	}
+	ProductList[idx].ID = id
+	return nil
+}
+
+// getProductByID returns a product by its ID and it's Index
+func (p *Product) getProductByID(id int) (*Product, int, error) {
+	for i, v := range ProductList {
+		if v.ID == id {
+			return v, i, nil
+		}
+	}
+	return nil, -1, ErrProductNotFound
 }
 
 type Products []*Product

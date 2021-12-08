@@ -44,7 +44,7 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid id, can't convert to number", http.StatusBadRequest)
 			return
 		}
-		p.l.Println("got id : ", id)
+		p.updateProduct(w, r, id)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -89,24 +89,26 @@ func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
 	p.l.Printf("Prod : %#v", prod)
 }
 
-// // updateProduct updates an existing product in the datastore
-// func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	p.l.Println("Handling PUT request...")
+// NOT WORKING
+// updateProduct updates an existing product in the datastore
+func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request, id int) {
+	w.Header().Set("Content-Type", "application/json")
+	p.l.Println("Handling PUT request...")
 
-// 	//  create a new instance of product struct
-// 	prod := &data.Product{}
+	//  create a new instance of product struct
+	prod := &data.Product{}
 
-// 	// deserialize the product struct from the request body
-// 	if err := prod.FromJSON(r.Body); err != nil {
-// 		http.Error(w, "Unable to decode json", http.StatusBadRequest)
-// 		p.l.Printf("Error while decoding json: %v", err)
-// 		return
-// 	}
+	// deserialize the product struct from the request body
+	if err := prod.FromJSON(r.Body); err != nil {
+		http.Error(w, "Unable to decode json", http.StatusBadRequest)
+		p.l.Printf("Error while decoding json: %v", err)
+		return
+	}
 
-// 	// update the product in the datastore
-// 	prod.UpdateProductByID()
-
-// 	w.WriteHeader(http.StatusOK)
-// 	p.l.Printf("Prod : %#v", prod)
-// }
+	err := prod.UpdateProductByID(prod.ID, id)
+	if err != nil {
+		http.Error(w, "Unable to update by id", http.StatusBadRequest)
+		p.l.Printf("Error while updating: %v", err)
+		return
+	}
+}
