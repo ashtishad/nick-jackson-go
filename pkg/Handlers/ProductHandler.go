@@ -61,6 +61,10 @@ func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
 		p.l.Printf("Error while decoding json: %v", err)
 		return
 	}
+
+	// add this new product to the datastore
+	prod.AddProduct()
+
 	w.WriteHeader(http.StatusCreated)
 	p.l.Printf("Prod : %#v", prod)
 }

@@ -26,11 +26,23 @@ func (p *Product) FromJSON(r io.Reader) error {
 	return err
 }
 
+func (p *Product) generateNextID() int {
+	idx := len(ProductList) - 1
+	lp := ProductList[idx]
+	return lp.ID + 1
+}
+
+func (p *Product) AddProduct() {
+	p.ID = p.generateNextID()
+	ProductList = append(ProductList, p)
+}
+
 type Products []*Product
 
 func (p *Products) Len() int {
 	return len(ProductList)
 }
+
 func GetProducts() Products {
 	return ProductList
 }
