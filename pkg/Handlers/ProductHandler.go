@@ -105,7 +105,7 @@ func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request, id int)
 		return
 	}
 
-	err := prod.UpdateProductByID(prod.ID, id)
+	err := prod.UpdateProductByID(id)
 	if err != nil {
 		http.Error(w, "Unable to update by id", http.StatusBadRequest)
 		p.l.Printf("Error while updating: %v", err)

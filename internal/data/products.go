@@ -40,12 +40,13 @@ func (p *Product) AddProduct() {
 
 var ErrProductNotFound = fmt.Errorf("product not found")
 
-func (p *Product) UpdateProductByID(id int, oldID int) error {
-	_, idx, err := p.getProductByID(oldID)
+func (p *Product) UpdateProductByID(id int) error {
+	_, idx, err := p.getProductByID(id)
 	if err != nil {
 		return err
 	}
-	ProductList[idx].ID = id
+	p.ID = id
+	ProductList[idx] = p
 	return nil
 }
 
