@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	handlers "github.com/ashtishad/go-microservice/pkg/Handlers"
+	handlers "github.com/ashtishad/go-microservice/internal/handlers"
 )
 
 const Port = ":8080"

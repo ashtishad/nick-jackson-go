@@ -89,7 +89,6 @@ func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
 	p.l.Printf("Prod : %#v", prod)
 }
 
-// NOT WORKING
 // updateProduct updates an existing product in the datastore
 func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request, id int) {
 	w.Header().Set("Content-Type", "application/json")
