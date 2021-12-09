@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	handlers "github.com/ashtishad/go-microservice/internal/handlers"
 )
 
@@ -16,15 +18,23 @@ const Port = ":8080"
 func main() {
 
 	l := log.New(os.Stdout, "product-api ", log.LstdFlags)
-	productHandler := handlers.NewProducts(l)
+	ph := handlers.NewProducts(l)
 
-	mux := http.NewServeMux()
+	// create a new serve mux and register the handlers
+	r := mux.NewRouter()
 
-	mux.Handle("/", productHandler)
+	getRtr := r.Methods(http.MethodGet).Subrouter()
+	getRtr.HandleFunc("/", ph.GetProducts)
+
+	postRtr := r.Methods(http.MethodPost).Subrouter()
+	postRtr.HandleFunc("/", ph.AddProduct)
+
+	putRtr := r.Methods(http.MethodPut).Subrouter()
+	putRtr.HandleFunc("/{id:[0-9]}", ph.UpdateProduct)
 
 	s := &http.Server{
 		Addr:         Port,
-		Handler:      mux,
+		Handler:      r,
 		IdleTimeout:  20 * time.Second,
 		ReadTimeout:  2 * time.Second,
 		WriteTimeout: 2 * time.Second,

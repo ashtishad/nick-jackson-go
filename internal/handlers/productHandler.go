@@ -4,10 +4,10 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/ashtishad/go-microservice/internal/data"
+	"github.com/gorilla/mux"
 )
 
 type Products struct {
@@ -18,40 +18,8 @@ func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
 }
 
-// ServeHTTP : Products implicitly implements the http.Handler interface
-func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	switch r.Method {
-	case http.MethodGet:
-		p.getProducts(w, r)
-	case http.MethodPost:
-		p.addProduct(w, r)
-	case http.MethodPut:
-		// expects a product id in the URL path
-		// localhost:8080/products/1
-		rgx := regexp.MustCompile(`/([0-9]+)`)
-		grp := rgx.FindAllStringSubmatch(r.URL.Path, -1)
-		// p.l.Printf("Captured Group : %#v", grp)
-		// grp = [][]string{[]string{"/3", "3"}}
-		if len(grp) != 1 || len(grp[0]) != 2 {
-			http.Error(w, "Invalid URI", http.StatusBadRequest)
-			return
-		}
-
-		idStr := grp[0][1] // "3"
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			http.Error(w, "Invalid id, can't convert to number", http.StatusBadRequest)
-			return
-		}
-		p.updateProduct(w, r, id)
-	default:
-		w.WriteHeader(http.StatusNotFound)
-	}
-}
-
-// getProducts returns all the products from datastore
-func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
+// GetProducts returns all the products from datastore
+func (p *Products) GetProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	p.l.Println("Handling GET request...")
 
@@ -67,8 +35,8 @@ func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
 	p.l.Printf("Total Products : %#v", lp.Len())
 }
 
-// addProduct adds a new product to the datastore
-func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
+// AddProduct adds a new product to the datastore
+func (p *Products) AddProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	p.l.Println("Handling POST request...")
 
@@ -89,10 +57,14 @@ func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
 	p.l.Printf("Prod : %#v", prod)
 }
 
-// updateProduct updates an existing product in the datastore
-func (p *Products) updateProduct(w http.ResponseWriter, r *http.Request, id int) {
+// UpdateProduct updates an existing product in the datastore
+func (p *Products) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	// gorrila generated id from request URI
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+
 	w.Header().Set("Content-Type", "application/json")
-	p.l.Println("Handling PUT request...")
+	p.l.Println("Handling PUT request..., id = ", id)
 
 	//  create a new instance of product struct
 	prod := &data.Product{}
