@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -29,7 +30,8 @@ func (p *Products) GetProducts(w http.ResponseWriter, _ *http.Request) {
 
 	// serialize/encode the list of products to JSON
 	if err := lp.ToJSON(w); err != nil {
-		http.Error(w, "Unable to encode json", http.StatusInternalServerError)
+		http.Error(w, "Unable to encode json", http.StatusBadRequest)
+		p.l.Printf("Error while encoding json : %v", err)
 		return
 	}
 
@@ -61,8 +63,7 @@ func (p *Products) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	prod := r.Context().Value(KeyProd{}).(*data.Product)
 
-	err := prod.UpdateProductByID(id)
-	if err != nil {
+	if err := prod.UpdateProductByID(id); err != nil {
 		http.Error(w, "Unable to update by id", http.StatusBadRequest)
 		p.l.Printf("Error while updating: %v", err)
 		return
@@ -75,19 +76,31 @@ type KeyProd struct {
 // ProductValidationMiddleware validates products
 func (p Products) ProductValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Do stuff here
 		//  create a new instance of product struct
 		prod := &data.Product{}
 
 		// deserialize the product struct from the request body
 		if err := prod.FromJSON(r.Body); err != nil {
-			http.Error(w, "Unable to decode json", http.StatusBadRequest)
-			p.l.Printf("Error while decoding json: %v", err)
+			http.Error(w,
+				fmt.Sprintf("Unable to read product %s", err),
+				http.StatusBadRequest)
+			p.l.Printf("Error while reading product: %v", err)
 			return
 		}
+
+		// validate the product using the Validator package
+		if err := prod.Validate(); err != nil {
+			http.Error(w,
+				fmt.Sprintf("Unable to validate product %s", err),
+				http.StatusBadRequest)
+			p.l.Printf("Error while validating product: %v", err)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), KeyProd{}, prod)
-		//log.Println(r.RequestURI)
+		nextReq := r.WithContext(ctx)
+		// p.l.Println(r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, nextReq)
 	})
 }
