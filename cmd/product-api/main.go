@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	handlers "github.com/ashtishad/go-microservice/internal/handlers"
+	"github.com/ashtishad/go-microservice/internal/handlers"
 )
 
 const Port = ":8080"
@@ -26,11 +26,13 @@ func main() {
 	getRtr := r.Methods(http.MethodGet).Subrouter()
 	getRtr.HandleFunc("/", ph.GetProducts)
 
-	postRtr := r.Methods(http.MethodPost).Subrouter()
-	postRtr.HandleFunc("/", ph.AddProduct)
-
 	putRtr := r.Methods(http.MethodPut).Subrouter()
 	putRtr.HandleFunc("/{id:[0-9]}", ph.UpdateProduct)
+	putRtr.Use(ph.ProductValidationMiddleware)
+
+	postRtr := r.Methods(http.MethodPost).Subrouter()
+	postRtr.HandleFunc("/", ph.AddProduct)
+	postRtr.Use(ph.ProductValidationMiddleware)
 
 	s := &http.Server{
 		Addr:         Port,
@@ -45,11 +47,10 @@ func main() {
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Fatal(err)
-			os.Exit(1)
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with
+	// Wait for interrupt signal to gracefully shut down the server with
 	// a timeout of 30 seconds.
 	quit := make(chan os.Signal, 1) // For a channel used for notification of just one signal value, a buffer of size 1 is sufficient.
 	signal.Notify(quit, os.Interrupt)

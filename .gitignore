@@ -37,3 +37,7 @@
 
 # Support for Project snippet scope
 !.vscode/*.code-snippets
+/.idea/.gitignore
+/.idea/go-nic-jackson.iml
+/.idea/modules.xml
+/.idea/vcs.xml
